@@ -1,0 +1,28 @@
+/* REXX */
+dsn_in = "DATA.Y20D3"
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN (FINIS STEM input."
+"FREE FILE(DSIN)"
+
+tree_count = 0
+row = 1
+col = 1
+rows = input.0
+width = LENGTH(input.1)
+
+DO WHILE row <= rows
+  line = input.row
+  pos = mod(col - 1, width) + 1
+
+  IF SUBSTR(line, pos, 1) = "#" THEN tree_count = tree_count + 1
+
+  row = row + 1
+  col = col + 3
+END
+
+SAY "AOC-Y2020-D3P1: Trees encountered:" tree_count
+EXIT 0
+
+mod: PROCEDURE
+  PARSE ARG dividend, divisor
+  RETURN dividend - (divisor * (dividend % divisor))

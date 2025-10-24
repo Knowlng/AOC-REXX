@@ -1,0 +1,55 @@
+/* REXX */
+dsn_in = "DATA.Y24D2"
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN (FINIS STEM input."
+"FREE FILE(DSIN)"
+
+count = 0
+DO i = 1 TO input.0
+  IF is_safe(input.i, 1) THEN count = count + 1
+END
+
+SAY "AOC-Y2024-D2P2: Answer:" count
+EXIT 0
+
+is_safe: PROCEDURE
+  PARSE ARG line, damp
+  num_levels = WORDS(line)
+  ups = 0
+  downs = 0
+  wrong_steps = 0
+
+  DO i = 2 TO num_levels
+    val_1 = WORD(line, i - 1)
+    val_2 = WORD(line, i)
+    diff = ABS(val_2 - val_1)
+
+    IF val_2 > val_1 THEN ups = ups + 1
+    ELSE IF val_2 < val_1 THEN downs = downs + 1
+
+    IF diff = 0 | diff > 3 THEN wrong_steps = wrong_steps + 1
+  END
+
+  IF (ups = 0 | downs = 0) & wrong_steps = 0 THEN RETURN 1
+
+  IF damp THEN DO
+    DO j = 1 TO num_levels
+      new_line = remove_entry(line, j)
+      IF is_safe(new_line, 0) THEN RETURN 1
+    END
+  END
+
+  RETURN 0
+remove_entry: PROCEDURE
+  PARSE ARG line, pos
+  new_line = ""
+  num_levels = WORDS(line)
+
+  IF pos < 1 | pos > num_levels THEN RETURN line
+
+  DO i = 1 TO num_levels
+    IF i = pos THEN ITERATE
+    new_line = new_line WORD(line, i)
+  END
+
+  RETURN STRIP(new_line)

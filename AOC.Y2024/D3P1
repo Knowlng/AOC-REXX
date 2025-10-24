@@ -1,0 +1,78 @@
+/* REXX */
+dsn_in = "DATA.Y24D3"
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN (FINIS STEM input.)"
+"FREE FILE(DSIN)"
+
+data = ""
+DO i = 1 TO input.0
+   data = data || input.i
+END
+
+total = 0
+len = LENGTH(data)
+nums = "0123456789"
+i = 1
+
+DO WHILE (i <= len)
+  /* Look for 'mul(' */
+  IF SUBSTR(data, i, 4) = "mul(" THEN DO
+    pos = i + 4
+
+    /* First number */
+    first_num = ""
+    DO WHILE (pos <= len & LENGTH(first_num) < 3)
+      ch = SUBSTR(data, pos, 1)
+      IF pos(ch, nums) > 0 THEN DO
+        first_num = first_num || ch
+        pos = pos + 1
+      END
+      ELSE LEAVE
+    END
+
+    IF first_num = "" THEN DO
+      i = i + 1
+      ITERATE
+    END
+
+    /* Check for comma */
+    IF pos > len | SUBSTR(data, pos, 1) <> "," THEN DO
+      i = i + 1
+      ITERATE
+    END
+
+    pos = pos + 1  /* Skip comma */
+
+    /* Second number */
+    second_num = ""
+    DO WHILE (pos <= len & LENGTH(second_num) < 3)
+      ch = SUBSTR(data, pos, 1)
+      IF pos(ch, nums) > 0 THEN DO
+        second_num = second_num || ch
+        pos = pos + 1
+      END
+      ELSE LEAVE
+    END
+
+    IF second_num = "" THEN DO
+      i = i + 1
+      ITERATE
+    END
+
+    /* Check for parenthesis */
+    IF pos > len | SUBSTR(data, pos, 1) <> ")" THEN DO
+      i = i + 1
+      ITERATE
+    END
+
+    total = total + first_num * second_num
+
+    /* Continue searching */
+    i = pos + 1
+    ITERATE
+  END
+  ELSE i = i + 1
+END
+
+SAY "AOC-Y2024-D3P1 Answer:" total
+EXIT 0

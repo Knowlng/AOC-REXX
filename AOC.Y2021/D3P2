@@ -1,0 +1,92 @@
+/* REXX */
+dsn_in = "DATA.Y21D3"
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN (FINIS STEM input.)"
+"FREE FILE(DSIN)"
+bit_length = LENGTH(input.1)
+oxy.0 = input.0
+co2.0 = input.0
+
+DO i = 1 TO input.0
+  oxy.i = input.i
+  co2.i = input.i
+END
+
+/* Oxygen generator rating */
+pos = 1
+DO WHILE (oxy.0 > 1 & pos <= bit_length)
+  count_0 = 0
+  count_1 = 0
+
+  /* Count bits */
+  DO i = 1 TO oxy.0
+    bit = SUBSTR(oxy.i, pos, 1)
+    IF bit = "1" THEN count_1 = count_1 + 1
+    ELSE IF bit = "0" THEN count_0 = count_0 + 1
+  END
+
+  IF count_1 >= count_0 THEN criteria = "1"
+  ELSE criteria = "0"
+
+  /* New list with entries that match */
+  new_count = 0
+  DO i = 1 TO oxy.0
+    IF SUBSTR(oxy.i, pos, 1) = criteria THEN DO
+      new_count = new_count + 1
+      new_oxy.new_count = oxy.i
+    END
+  END
+
+  oxy.0 = new_count
+  DO i = 1 TO new_count
+    oxy.i = new_oxy.i
+  END
+
+  pos = pos + 1
+END
+oxy_rating = oxy.1
+
+/* CO2 scrubber rating */
+pos = 1
+DO WHILE (co2.0 > 1 & pos <= bit_length)
+  count_0 = 0
+  count_1 = 0
+
+  DO i = 1 TO co2.0
+    bit = SUBSTR(co2.i, pos, 1)
+    IF bit = "1" THEN count_1 = count_1 + 1
+    ELSE IF bit = "0" THEN count_0 = count_0 + 1
+  END
+
+  IF count_0 <= count_1 THEN criteria = "0"
+  ELSE criteria = "1"
+
+  new_count = 0
+  DO i = 1 TO co2.0
+    IF SUBSTR(co2.i, pos, 1) = criteria THEN DO
+      new_count = new_count + 1
+      new_co2.new_count = co2.i
+    END
+  END
+
+  co2.0 = new_count
+  DO i = 1 TO new_count
+    co2.i = new_co2.i
+  END
+
+  pos = pos + 1
+END
+co2_rating = co2.1
+
+/* Binary to decimal */
+oxy_dec = 0
+DO i = 1 TO bit_length
+  oxy_dec = oxy_dec * 2 + (SUBSTR(oxy_rating, i, 1) + 0)
+END
+co2_dec = 0
+DO i = 1 TO bit_length
+  co2_dec = co2_dec * 2 + (SUBSTR(co2_rating, i, 1) + 0)
+END
+
+SAY "AOC-Y2021-D3P2: Answer:" oxy_dec * co2_dec
+EXIT 0

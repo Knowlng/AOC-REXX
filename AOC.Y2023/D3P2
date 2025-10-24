@@ -1,0 +1,78 @@
+/* REXX */
+dsn_in = "DATA.Y23D3"
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN(FINIS STEM input."
+"FREE FILE(DSIN)"
+
+sum_ratio = 0
+nums = "0123456789"
+DO r = 1 TO input.0
+  len = LENGTH(input.r)
+
+  DO c = 1 TO len
+    ch = SUBSTR(input.r, c, 1)
+
+    IF ch = "*" THEN DO
+       /* Initialize an array to hold distinct adjacent part numbers */
+       gearParts.0 = 0
+       /* Examine all 8 neighboring cells */
+       DO dr = -1 TO 1 /* 1 row up and 1 row down */
+         neighbor_r = r + dr
+         IF neighbor_r < 1 | neighbor_r > input.0 THEN ITERATE /* Check bounds*/
+         neighbor_line = input.neighbor_r
+         DO dc = -1 TO 1
+           IF dr = 0 & dc = 0 THEN ITERATE   /* Skip the gear cell itself */
+           neighbor_c = c + dc
+           IF neighbor_c < 1 | neighbor_c > len THEN ITERATE /* Check bounds */
+           neighbor_char = SUBSTR(neighbor_line, neighbor_c, 1)
+           /* If the neighbor cell is a digit, extract the full number */
+           IF POS(neighbor_char, nums) > 0 THEN DO
+             part = get_number(neighbor_line, neighbor_c)
+
+             /* Check if this part number has already been added */
+             /*duplicate = 0
+             DO i = 1 TO gearParts.0
+               IF gearParts.i = part THEN duplicate = 1
+             END */
+            /* IF duplicate = 0 THEN DO */
+                gearParts.0 = gearParts.0 + 1
+                part_index = gearParts.0
+                gearParts.part_index = part
+           /*  END */
+           END
+         END
+       END
+
+       /* A valid gear is adjacent to exactly two distinct part numbers */
+       IF gearParts.0 = 2 THEN DO
+         num1 = gearParts.1
+         num2 = gearParts.2
+         ratio = num1 * num2
+         sum_ratio = sum_ratio + ratio
+       END
+    END
+  END
+END
+SAY "AOC-Y2023-D3P2: Answer:" sum_ratio
+EXIT 0
+get_number: PROCEDURE expose r
+  PARSE ARG line, pos
+  start = pos
+  nums ="0123456789"
+  /* Expand left while the preceding characters are digits */
+  DO WHILE start > 1
+    temp = SUBSTR(line, start - 1, 1)
+    IF POS(temp, nums) > 0 THEN
+      start = start - 1
+    ELSE
+    LEAVE
+  END
+  endPos = pos
+  DO WHILE endPos < LENGTH(line)
+    temp = SUBSTR(line, endPos + 1, 1)
+    IF POS(temp, nums) > 0 THEN
+      endPos = endPos + 1
+    ELSE
+      LEAVE
+  END
+  RETURN SUBSTR(line, start, endPos - start + 1)

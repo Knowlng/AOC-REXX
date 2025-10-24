@@ -1,0 +1,40 @@
+/* REXX */
+dsn_in = "DATA.Y21D3"
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN (FINIS STEM input.)"
+"FREE FILE(DSIN)"
+
+bit_length = LENGTH(input.1)
+gamma_str   = ""
+epsilon_str = ""
+DO i = 1 TO bit_length
+  count_0 = 0
+  count_1 = 0
+
+  DO j = 1 TO input.0
+    bit = SUBSTR(input.j, i, 1)
+
+    IF bit = "1" THEN count_1 = count_1 + 1
+    ELSE IF bit = "0" THEN count_0 = count_0 + 1
+  END
+
+  IF count_1 >= count_0 THEN DO
+    gamma_str   = gamma_str   || "1"
+    epsilon_str = epsilon_str || "0"
+  END
+  ELSE DO
+    gamma_str   = gamma_str   || "0"
+    epsilon_str = epsilon_str || "1"
+  END
+
+END
+
+dec_gamma   = 0
+dec_epsilon = 0
+DO i = 1 TO bit_length
+  dec_gamma   = dec_gamma * 2 + (SUBSTR(gamma_str, i, 1) + 0)
+  dec_epsilon = dec_epsilon * 2 + (SUBSTR(epsilon_str, i, 1) + 0)
+END
+
+SAY "AOC-Y2021-D3P1: Answer:" dec_gamma * dec_epsilon
+EXIT 0

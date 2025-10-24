@@ -1,0 +1,52 @@
+/* REXX */
+dsn_in = "DATA.Y24D4"
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN(FINIS STEM input."
+"FREE FILE(DSIN)"
+
+xmas = "XMAS"
+w_len = LENGTH(xmas)
+col_n = LENGTH(input.1)
+total = 0
+/* Offsets */
+dirRow.1 = -1;  dirCol.1 = -1
+dirRow.2 = -1;  dirCol.2 =  0
+dirRow.3 = -1;  dirCol.3 =  1
+dirRow.4 =  0;  dirCol.4 = -1
+dirRow.5 =  0;  dirCol.5 =  1
+dirRow.6 =  1;  dirCol.6 = -1
+dirRow.7 =  1;  dirCol.7 =  0
+dirRow.8 =  1;  dirCol.8 =  1
+
+DO r = 1 TO input.0
+  DO c = 1 TO col_n
+    /* Check 8 directions */
+    DO d = 1 TO 8
+      dr = dirRow.d
+      dc = dirCol.d
+
+      /* Calculate the ending cell */
+      new_r = r + (w_len - 1) * dr
+      new_c = c + (w_len - 1) * dc
+      /* Skip if the word would run off the grid */
+      IF new_r < 1 | new_r > input.0 | new_c < 1 | new_c > input.0 THEN ITERATE
+
+      match = 1
+
+      /* Check each letter */
+      DO i = 0 TO w_len - 1
+        rr = r + i * dr
+        cc = c + i * dc
+        IF SUBSTR(input.rr, cc, 1) <> SUBSTR(xmas, i+1, 1) THEN DO
+          match = 0
+          LEAVE
+        END
+      END
+
+      IF match = 1 THEN total = total + 1
+    END
+  END
+END
+
+SAY "AOC-Y2024-D4P1: Answer:" total
+EXIT 0

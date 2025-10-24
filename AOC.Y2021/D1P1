@@ -1,0 +1,15 @@
+/* REXX */
+dsn_in = "DATA.Y21D1"
+
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN(FINIS STEM input."
+"FREE FILE(DSIN)"
+
+count = 0
+DO i = 2 TO input.0
+    j = i - 1                   /* previous value */
+    IF input.i > input.j THEN
+      count = count + 1
+END
+Say "AOC-Y2021-D1P1: Answer:" count
+EXIT 0

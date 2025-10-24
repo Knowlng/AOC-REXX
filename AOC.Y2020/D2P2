@@ -1,0 +1,22 @@
+/* rexx */
+dsn_in = "DATA.Y20D2"
+
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN(FINIS STEM input."
+"FREE FILE(DSIN)"
+
+valid_count = 0
+DO i = 1 TO input.0
+  PARSE VAR input.i min '-' max ' ' char ':' password
+  pos1 = min + 1
+  pos2 = max + 1
+
+  char1 = SUBSTR(password, pos1, 1)
+  char2 = SUBSTR(password, pos2, 1)
+   IF (char1 = char & char2 \= char) |,
+      (char1 \= char & char2 = char) THEN
+      valid_count = valid_count + 1
+END
+
+SAY "AOC-Y2020-D2P2: Valid Passwords:" valid_count
+EXIT 0

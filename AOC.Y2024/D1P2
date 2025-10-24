@@ -1,0 +1,25 @@
+/* REXX */
+dsn_in = "DATA.Y24D1"
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN (FINIS STEM input.)"
+"FREE FILE(DSIN)"
+
+DO i = 1 TO input.0
+  PARSE VAR input.i val_1 val_2
+  list_1.i = val_1
+  list_2.i = val_2
+END
+
+score = 0
+DO i = 1 TO input.0
+  count = 0
+
+  DO j = 1 TO input.0
+    IF list_2.j = list_1.i THEN count = count + 1
+  END
+
+  score = score + (list_1.i * count)
+END
+
+SAY "AOC-Y2024-D1P2: Answer:" score
+EXIT 0

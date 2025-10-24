@@ -1,0 +1,25 @@
+/* REXX */
+dsn_in = "DATA.Y22D2"
+
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN(FINIS STEM input."
+"FREE FILE(DSIN)"
+
+score = 0
+DO i = 1 TO input.0
+  PARSE VAR input.i opp outcome
+   SELECT
+      WHEN (opp = "A" & outcome = "X") THEN score = score + 3
+      WHEN (opp = "A" & outcome = "Y") THEN score = score + 4
+      WHEN (opp = "A" & outcome = "Z") THEN score = score + 8
+      WHEN (opp = "B" & outcome = "X") THEN score = score + 1
+      WHEN (opp = "B" & outcome = "Y") THEN score = score + 5
+      WHEN (opp = "B" & outcome = "Z") THEN score = score + 9
+      WHEN (opp = "C" & outcome = "X") THEN score = score + 2
+      WHEN (opp = "C" & outcome = "Y") THEN score = score + 6
+      WHEN (opp = "C" & outcome = "Z") THEN score = score + 7
+    END
+END
+
+Say "AOC-Y2022-D2P2: Answer:" score
+EXIT 0

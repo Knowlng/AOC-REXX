@@ -1,0 +1,39 @@
+/* REXX */
+dsn_in = "DATA.Y22D3"
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN (FINIS STEM input.)"
+"FREE FILE(DSIN)"
+
+lower_case = "abcdefghijklmnopqrstuvwxyz"
+upper_case = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+total = 0
+
+DO i = 1 TO input.0 BY 3
+  j = i + 1
+  k = i + 2
+  sack_1 = input.i
+  sack_2 = input.j
+  sack_3 = input.k
+
+  common = ""
+  DO j = 1 TO LENGTH(sack_1)
+    letter = SUBSTR(sack_1, j, 1)
+    IF POS(letter, sack_2) > 0 & POS(letter, sack_3) > 0 THEN DO
+      common = letter
+      LEAVE
+    END
+  END
+
+  IF common = "" THEN ITERATE
+
+  IF POS(common, lower_case) > 0 THEN
+    priority = POS(common, lower_case)
+  ELSE IF POS(common, upper_case) > 0 THEN
+    priority = POS(common, upper_case) + 26
+  ELSE priority = 0
+
+  total = total + priority
+END
+
+SAY "AOC-Y2022-D3P2: Answer:" total
+EXIT 0

@@ -1,0 +1,35 @@
+/* REXX */
+dsn_in = "DATA.Y24D4"
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN (FINIS STEM input."
+"FREE FILE(DSIN)"
+
+total = 0
+col_n = LENGTH(input.1)
+
+/* Sliding 3x3 window */
+DO r = 1 TO input.0 - 2
+  DO c = 1 TO col_n - 2
+
+    /* MIDDLE */
+    middle = r + 1
+    IF SUBSTR(input.middle,c+1,1) <> "A" THEN ITERATE
+
+    /* UP LEFT & DOWN RIGHT */
+    UL = SUBSTR(input.r,c,1)
+    DR = r + 2
+    DR = SUBSTR(input.DR,c+2,1)
+    validULDR = ((UL = "M" & DR = "S") | (UL = "S" & DR = "M"))
+
+    /* UP RIGHT & DOWN LEFT */
+    UR = SUBSTR(input.r,c+2,1)
+    DL = r + 2
+    DL = SUBSTR(input.DL,c,1)
+    validURDL = ((UR = "M" & DL = "S") | (UR = "S" & DL = "M"))
+
+    IF validULDR & validURDL THEN total = total + 1
+  END
+END
+
+SAY "AOC-Y24D4P2: Answer:" total
+EXIT 0

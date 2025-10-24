@@ -1,0 +1,44 @@
+/* REXX */
+dsn_in = "DATA.Y20D5"
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN (FINIS STEM input.)"
+"FREE FILE(DSIN)"
+
+max_id = 0
+DO i = 1 TO input.0
+  pass = STRIP(input.i)
+  row_spec = SUBSTR(pass, 1, 7)
+  col_spec = SUBSTR(pass, 8, 3)
+
+  row_bin = ""
+  DO j = 1 TO LENGTH(row_spec)
+    letter = SUBSTR(row_spec, j, 1)
+    IF letter = "F" THEN row_bin = row_bin || "0"
+    ELSE IF letter = "B" THEN row_bin = row_bin || "1"
+  END
+
+  row = 0
+  DO j = 1 TO LENGTH(row_bin)
+    bit = SUBSTR(row_bin, j, 1)
+    row = row * 2 + bit
+  END
+
+  col_bin = ""
+  DO j = 1 TO LENGTH(col_spec)
+    letter = SUBSTR(col_spec, j, 1)
+    IF letter = "L" THEN col_bin = col_bin || "0"
+    ELSE IF letter = "R" THEN col_bin = col_bin || "1"
+  END
+
+  col = 0
+  DO j = 1 TO LENGTH(col_bin)
+    bit = SUBSTR(col_bin, j, 1)
+    col = col * 2 + bit
+  END
+
+  seat_id = row * 8 + col
+  IF seat_id > max_id THEN max_id = seat_id
+END
+
+SAY "AOC-Y2020-D5: Answer:" max_id
+EXIT 0

@@ -1,0 +1,67 @@
+/* REXX */
+dsn_in = "DATA.Y23D1"
+
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN(FINIS STEM input."
+"FREE FILE(DSIN)"
+
+num_map.1 = "one"
+num_map.2 = "two"
+num_map.3 = "three"
+num_map.4 = "four"
+num_map.5 = "five"
+num_map.6 = "six"
+num_map.7 = "seven"
+num_map.8 = "eight"
+num_map.9 = "nine"
+
+total = 0
+DO i = 1 TO input.0
+  num_1 = ''
+  num_2 = ''
+  /* First digit */
+  DO j = 1 TO LENGTH(input.i)
+    IF num_1 <> '' THEN LEAVE /* if already found, exit */
+    /* Check numeric */
+    char = SUBSTR(input.i, j, 1)
+    IF DATATYPE(char, "N") THEN DO
+      num_1 = char
+      LEAVE
+    END
+
+    /* Check string digit */
+    DO k = 1 TO 9
+      num_str = num_map.k
+      num_len = LENGTH(num_str)
+      IF SUBSTR(input.i, j, num_len) = num_str THEN DO
+        num_1 = k
+        LEAVE
+      END
+    END
+  END
+
+  /* Last digit */
+  DO j = LENGTH(input.i) TO 1 BY -1
+    IF num_2 <> '' THEN LEAVE
+    char = SUBSTR(input.i, j, 1)
+    IF DATATYPE(char, "N") THEN DO
+      num_2 = char
+      LEAVE
+    END
+
+    DO k = 1 TO 9
+      num_str = num_map.k
+      num_len = LENGTH(num_str)
+      IF SUBSTR(input.i, j, num_len) = num_str THEN DO
+        num_2 = k
+        LEAVE
+      END
+    END
+  END
+
+  final_num = num_1 || num_2
+  total = total + final_num
+END
+
+Say "AOC-Y2023-D1P2: Answer:" total
+EXIT 0

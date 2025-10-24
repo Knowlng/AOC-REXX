@@ -1,0 +1,47 @@
+/* REXX */
+dsn_in = "DATA.Y23D2"
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN(FINIS STEM input.)"
+"FREE FILE(DSIN)"
+
+total = 0
+max_r = 12
+max_g = 13
+max_b = 14
+DO i = 1 TO input.0
+  possible = 1
+  PARSE VAR input.i "Game" game_id ":" rest_games
+
+  DO WHILE possible & rest_games <> ""
+    rest_games = check_game(rest_games)
+  END
+  IF possible THEN total = total + game_id
+END
+
+Say "AOC-Y2023-D2P1: Answer:" total
+EXIT 0
+
+check_game:
+  PARSE ARG data
+  possible = 1
+  IF data = "" THEN RETURN ""
+
+  PARSE VAR data subset ";" next_games
+
+  DO WHILE possible & subset <> ""
+    subset = check_entry(subset)
+  END
+  RETURN next_games
+
+check_entry:
+  PARSE ARG subset
+  IF subset = "" THEN RETURN ""
+
+  PARSE VAR subset count color "," next_entries
+  SELECT
+    WHEN color = "red" & count > max_r THEN possible = 0
+    WHEN color = "green" & count > max_g THEN possible = 0
+    WHEN color = "blue" & count > max_b THEN possible = 0
+    OTHERWISE
+  END
+RETURN next_entries

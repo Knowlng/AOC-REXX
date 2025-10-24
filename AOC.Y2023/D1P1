@@ -1,0 +1,29 @@
+/* REXX */
+ dsn_in = "DATA.Y23D1"
+
+ "ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+ "EXECIO * DISKR DSIN(FINIS STEM input."
+ "FREE FILE(DSIN)"
+
+ total = 0
+ DO i = 1 TO input.0
+   DO j = 1 TO LENGTH(input.i)
+      char = SUBSTR(input.i, j, 1)
+      IF DATATYPE(char, "N") THEN DO
+        char_1 = char
+        LEAVE
+      END
+   END
+   DO j = LENGTH(input.i) TO 1 BY -1
+       char = SUBSTR(input.i, j, 1)
+       IF DATATYPE(char, "N") THEN DO
+         char_2 = char
+         LEAVE
+       END
+    END
+ num = char_1 || char_2
+ total = total + num
+ END
+
+ Say "AOC-Y2023-D1P1: Answer:" total
+ EXIT 0

@@ -1,0 +1,38 @@
+/* REXX */
+dsn_in = "DATA.Y23D4"
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR  DSIN(FINIS STEM input."
+"FREE FILE(DSIN)"
+
+totalPoints = 0
+DO i = 1 TO input.0
+  win_nums = STRIP(SUBSTR(input.i, 1, POS("|", input.i) - 1))
+  my_nums   = STRIP(SUBSTR(input.i, POS("|", input.i) + 1))
+  match_count = 0
+
+  /* Get match count */
+  DO j = 1 TO WORDS(my_nums)
+    my_num = WORD(my_nums, j)
+    DO k = 1 TO WORDS(win_nums)
+      win_num = WORD(win_nums, k)
+      IF win_num = my_num THEN DO
+        match_count = match_count + 1
+        LEAVE
+      END
+    END
+  END
+
+  /* Calculate points */
+  IF match_count > 0 THEN DO
+    points = 1
+    DO j = 2 TO match_count
+      points = points * 2
+    END
+  END
+  ELSE points = 0
+
+  totalPoints = totalPoints + points
+END
+
+SAY "AOC-Y23D4P1: Answer:" totalPoints
+EXIT 0

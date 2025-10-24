@@ -1,0 +1,40 @@
+/* REXX */
+dsn_in = "DATA.Y20D4"
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN (FINIS STEM input.)"
+"FREE FILE(DSIN)"
+
+count = 0
+passport = ""
+DO i = 1 TO input.0
+  IF STRIP(input.i) = "" THEN DO
+    IF check_valid(passport) = 1 THEN count = count + 1
+    passport = ""
+  END
+  ELSE DO
+    IF passport = "" THEN
+      passport = input.i
+    ELSE
+      passport = passport || " " || input.i
+   END
+END
+
+/* Process last */
+IF STRIP(passport) <> "" THEN DO
+  IF check_valid(passport) = 1 THEN count = count + 1
+END
+
+SAY "AOC-Y2020-D4P1: Answer:" count
+exit 0
+
+check_valid: PROCEDURE
+   PARSE ARG pass
+   required = "byr iyr eyr hgt hcl ecl pid"
+   valid = 1
+
+   DO j = 1 TO WORDS(required)
+     field = WORD(required, j)
+     IF POS(field, pass) = 0 THEN valid = 0
+   END
+
+ RETURN valid

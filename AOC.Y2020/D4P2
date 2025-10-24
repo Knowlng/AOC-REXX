@@ -1,0 +1,113 @@
+/* REXX */
+dsn_in = "DATA.Y20D4"
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN (FINIS STEM input.)"
+"FREE FILE(DSIN)"
+
+count = 0
+passport = ""
+DO i = 1 TO input.0
+  IF STRIP(input.i) = "" THEN DO
+    IF check_valid(passport) = 1 THEN count = count + 1
+    passport = ""
+  END
+  ELSE DO
+    IF passport = "" THEN
+      passport = input.i
+    ELSE
+      passport = passport || " " || input.i
+  END
+END
+
+/* Process last */
+IF STRIP(passport) <> "" THEN DO
+  IF check_valid(passport) = 1 THEN count = count + 1
+END
+
+SAY "AOC-Y2020-D4P2: Answer:" count
+EXIT 0
+
+check_valid: PROCEDURE
+  PARSE ARG pass
+  FIELDS. = 'empty'
+
+  /* Build a stem array FIELDS with key:value pairs */
+  DO i = 1 TO WORDS(pass)
+    token = WORD(pass, i)
+    PARSE VAR token key ":" data
+    FIELDS.key = data
+  END
+
+  /* Check for the presence of all required fields */
+  required = "byr iyr eyr hgt hcl ecl pid"
+  valid = 1
+
+  DO j = 1 TO WORDS(required)
+    field = WORD(required, j)
+    IF FIELDS.field = 'empty' THEN RETURN 0
+  END
+
+  /* Validate byr */
+  byr = 'byr'
+  byr = FIELDS.byr
+  IF LENGTH(byr) <> 4 THEN RETURN 0
+  byr_val = byr + 0
+  IF byr_val < 1920 | byr_val > 2002 THEN RETURN 0
+
+  /* Validate iyr */
+  iyr = 'iyr'
+  iyr = FIELDS.iyr
+  IF LENGTH(iyr) <> 4 THEN RETURN 0
+  iyr_val = iyr + 0
+  IF iyr_val < 2010 | iyr_val > 2020 THEN RETURN 0
+
+  /* Validate eyr */
+  eyr = 'eyr'
+  eyr = FIELDS.eyr
+  IF LENGTH(eyr) <> 4 THEN RETURN 0
+  eyr_val = eyr + 0
+  IF eyr_val < 2020 | eyr_val > 2030 THEN RETURN 0
+
+  /* Validate hgt */
+  hgt = 'hgt'
+  hgt = FIELDS.hgt
+  IF LENGTH(hgt) < 3 THEN RETURN 0
+  unit = RIGHT(hgt, 2)
+  num_part = LEFT(hgt, LENGTH(hgt) - 2)
+  hgt_val = num_part + 0
+  IF unit = "cm" THEN DO
+    IF hgt_val < 150 | hgt_val > 193 THEN RETURN 0
+  END
+  ELSE IF unit = "in" THEN DO
+    IF hgt_val < 59 | hgt_val > 76 THEN RETURN 0
+  END
+  ELSE RETURN 0
+
+  /* Validate hcl */
+  hcl ='hcl'
+  hcl = FIELDS.hcl
+  IF LENGTH(hcl) <> 7 THEN RETURN 0
+  IF SUBSTR(hcl, 1, 1) <> "#" THEN RETURN 0
+  allowed = "0123456789abcdef"
+  DO i = 2 TO 7
+    ch = SUBSTR(hcl, i, 1)
+    IF POS(ch, allowed) = 0 THEN RETURN 0
+  END
+
+  /* Validate ecl */
+  ecl = 'ecl'
+  ecl = FIELDS.ecl
+  valid_ecl = "amb blu brn gry grn hzl oth"
+  found = 0
+  DO i = 1 TO WORDS(valid_ecl)
+    IF ecl = WORD(valid_ecl, i) THEN found = 1
+  END
+  IF found = 0 THEN RETURN 0
+
+  /* Validate pid */
+  pid = 'pid'
+  pid = FIELDS.pid
+  IF LENGTH(pid) <> 9 THEN RETURN 0
+  IF VERIFY(pid, "0123456789") > 0 THEN RETURN 0
+
+  RETURN 1 /* valid pass if every check passes */

@@ -1,0 +1,33 @@
+/* REXX */
+dsn_in = "DATA.Y22D1"
+
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN(FINIS STEM input."
+"FREE FILE(DSIN)"
+
+current = 0
+max_1 = 0
+max_2 = 0
+max_3 = 0
+
+DO i = 1 TO input.0
+  IF SYMBOL(input.i) = 'BAD' THEN DO
+    IF current >  max_1 THEN DO /* shifting values down */
+      max_3 = max_2
+      max_2 = max_1
+      max_1 = current
+    END
+    ELSE IF current > max_2 THEN DO
+      max_3 = max_2
+      max_2 = current
+    END
+    ELSE IF current > max_3 THEN max_3 = current
+
+    current = 0
+    ITERATE
+  END
+  current = current + input.i
+END
+
+Say "AOC-Y2022-D1P2: Answer:" max_1 + max_2 + max_3
+EXIT 0

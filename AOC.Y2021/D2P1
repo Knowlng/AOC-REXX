@@ -1,0 +1,20 @@
+/* REXX */
+dsn_in = "DATA.Y21D2"
+
+"ALLOC DD(DSIN) DATASET('"dsn_in"') SHR"
+"EXECIO * DISKR DSIN(FINIS STEM input."
+"FREE FILE(DSIN)"
+
+depth = 0
+position = 0
+DO i = 1 TO input.0
+  PARSE VAR input.i direction amount
+  SELECT
+    WHEN direction = "forward" THEN position = position + amount
+    WHEN direction = "down"    THEN depth = depth + amount
+    WHEN direction = "up"      THEN depth = depth - amount
+   END
+END
+
+Say "AOC-Y2021-D2P1: Answer:" position * depth
+EXIT 0
